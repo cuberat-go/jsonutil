@@ -3,6 +3,7 @@ package jsonutil_test
 import (
 	// Core/builtin modules.
 
+	"bytes"
 	"encoding/json"
 	"testing"
 
@@ -19,6 +20,40 @@ import (
 )
 
 func TestEncoder(t *testing.T) {
+	expectedOutStr := `{"field1":"value1","field2":42}`
+	var expected any
+	err := json.Unmarshal([]byte(expectedOutStr), &expected)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal expected output: %v", err)
+	}
+
+	protoEncode := func(m proto.Message) ([]byte, error) {
+		return protojson.MarshalOptions{UseProtoNames: true}.Marshal(m)
+	}
+
+	b := &bytes.Buffer{}
+
+	myProto := &my_proto_stuff.MyProtoStuff{Field1: "value1", Field2: 42}
+	enc := jsonutil.NewEncoder(b).WithMarshalers(
+		jsonutil.JoinMarshalers(
+			jsonutil.MarshalFunc(protoEncode),
+		))
+	err = enc.Encode(myProto)
+	if err != nil {
+		t.Fatalf("Failed to marshal: %v", err)
+	}
+	got := b.Bytes()
+	t.Logf("Encoded output: %s", string(got))
+
+	var gotAny any
+	err = json.Unmarshal(got, &gotAny)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal encoded output: %v", err)
+	}
+	assert.Equal(t, expected, gotAny)
+}
+
+func TestMarshaler(t *testing.T) {
 	expectedOutStr := `{"field1":"value1","field2":42}`
 	var expected any
 	err := json.Unmarshal([]byte(expectedOutStr), &expected)

@@ -53,7 +53,9 @@ Use the JoinMarshalers function to combine multiple marshalers into a single one
 - [Variables](#variables)
 - [func Marshal\(v any\) \(\[\]byte, error\)](#Marshal)
 - [type Encoder](#Encoder)
+  - [func NewEncoder\(w io.Writer\) \*Encoder](#NewEncoder)
   - [func WithMarshalers\(marshalers \*Marshalers\) \*Encoder](#WithMarshalers)
+  - [func \(e \*Encoder\) Encode\(v any\) error](#Encoder.Encode)
   - [func \(e \*Encoder\) Marshal\(v any\) \(\[\]byte, error\)](#Encoder.Marshal)
   - [func \(e \*Encoder\) WithMarshalers\(marshalers \*Marshalers\) \*Encoder](#Encoder.WithMarshalers)
 - [type Marshalers](#Marshalers)
@@ -61,6 +63,12 @@ Use the JoinMarshalers function to combine multiple marshalers into a single one
   - [func MarshalFunc\[T any\]\(fn func\(T\) \(\[\]byte, error\)\) \*Marshalers](#MarshalFunc)
 
 ## Variables
+
+<a name="ErrEncoderNoWriter"></a>
+
+```go
+var ErrEncoderNoWriter = errors.New("encoder: no writer specified")
+```
 
 <a name="SkipFunc"></a>
 
@@ -70,7 +78,7 @@ var SkipFunc = errors.New("json: skip function")
 
 <a name="Marshal"></a>
 
-## func Marshal
+## func [Marshal](https://github.com/cuberat-go/jsonutil/blob/main/encoder.go#L105)
 
 ```go
 func Marshal(v any) ([]byte, error)
@@ -80,7 +88,7 @@ Marshals a value using the default encoder with no custom marshalers.
 
 <a name="Encoder"></a>
 
-## type Encoder
+## type [Encoder](https://github.com/cuberat-go/jsonutil/blob/main/encoder.go#L89-L93)
 
 Structure representing a JSON encoder with support for custom marshalers.
 
@@ -90,9 +98,19 @@ type Encoder struct {
 }
 ```
 
+<a name="NewEncoder"></a>
+
+### func [NewEncoder](https://github.com/cuberat-go/jsonutil/blob/main/encoder.go#L96)
+
+```go
+func NewEncoder(w io.Writer) *Encoder
+```
+
+Creates a new encoder that writes to the specified io.Writer.
+
 <a name="WithMarshalers"></a>
 
-### func WithMarshalers
+### func [WithMarshalers](https://github.com/cuberat-go/jsonutil/blob/main/encoder.go#L277)
 
 ```go
 func WithMarshalers(marshalers *Marshalers) *Encoder
@@ -100,9 +118,19 @@ func WithMarshalers(marshalers *Marshalers) *Encoder
 
 Creates a new encoder with the specified custom marshalers.
 
+<a name="Encoder.Encode"></a>
+
+### func \(\*Encoder\) [Encode](https://github.com/cuberat-go/jsonutil/blob/main/encoder.go#L111)
+
+```go
+func (e *Encoder) Encode(v any) error
+```
+
+Marshals/Encodes a value and writes it to the encoder's writer.
+
 <a name="Encoder.Marshal"></a>
 
-### func \(\*Encoder\) Marshal
+### func \(\*Encoder\) [Marshal](https://github.com/cuberat-go/jsonutil/blob/main/encoder.go#L125)
 
 ```go
 func (e *Encoder) Marshal(v any) ([]byte, error)
@@ -112,7 +140,7 @@ Marshals a value using the encoder, considering any custom marshalers that have 
 
 <a name="Encoder.WithMarshalers"></a>
 
-### func \(\*Encoder\) WithMarshalers
+### func \(\*Encoder\) [WithMarshalers](https://github.com/cuberat-go/jsonutil/blob/main/encoder.go#L271)
 
 ```go
 func (e *Encoder) WithMarshalers(marshalers *Marshalers) *Encoder
@@ -122,7 +150,7 @@ Sets the custom marshalers for the encoder and returns the encoder itself.
 
 <a name="Marshalers"></a>
 
-## type Marshalers
+## type [Marshalers](https://github.com/cuberat-go/jsonutil/blob/main/encoder.go#L23-L25)
 
 Structure used for managing custom marshalers.
 
@@ -134,7 +162,7 @@ type Marshalers struct {
 
 <a name="JoinMarshalers"></a>
 
-### func JoinMarshalers
+### func [JoinMarshalers](https://github.com/cuberat-go/jsonutil/blob/main/encoder.go#L62)
 
 ```go
 func JoinMarshalers(ms ...*Marshalers) *Marshalers
@@ -144,7 +172,7 @@ Joins multiple Marshalers into a single Marshalers instance.
 
 <a name="MarshalFunc"></a>
 
-### func MarshalFunc
+### func [MarshalFunc](https://github.com/cuberat-go/jsonutil/blob/main/encoder.go#L72)
 
 ```go
 func MarshalFunc[T any](fn func(T) ([]byte, error)) *Marshalers

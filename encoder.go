@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 )
 
 var SkipFunc = errors.New("json: skip function")
+var ErrEncoderNoWriter = errors.New("encoder: no writer specified")
 
 // A custom marshaler or unmarshaller for a specific type.
 type arshaler struct {
@@ -86,6 +88,13 @@ func MarshalFunc[T any](fn func(T) ([]byte, error)) *Marshalers {
 // Structure representing a JSON encoder with support for custom marshalers.
 type Encoder struct {
 	marshalers *Marshalers
+	writer     io.Writer
+	builtin    *json.Encoder
+}
+
+// Creates a new encoder that writes to the specified io.Writer.
+func NewEncoder(w io.Writer) *Encoder {
+	return &Encoder{writer: w, builtin: json.NewEncoder(w)}
 }
 
 func newEncoder() *Encoder {
@@ -96,6 +105,19 @@ func newEncoder() *Encoder {
 func Marshal(v any) ([]byte, error) {
 	e := newEncoder()
 	return e.Marshal(v)
+}
+
+// Marshals/Encodes a value and writes it to the encoder's writer.
+func (e *Encoder) Encode(v any) error {
+	if e.writer == nil {
+		return ErrEncoderNoWriter
+	}
+
+	d, err := e.marshal(v)
+	if err != nil {
+		return err
+	}
+	return e.builtin.Encode(d)
 }
 
 // Marshals a value using the encoder, considering any custom marshalers that
